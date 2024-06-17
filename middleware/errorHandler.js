@@ -1,50 +1,39 @@
-const { constants } = require('../constants')
-
-
-const errorHandler = (err ,req, res, next) => {
-    const statusCode = res.statusCode ? res.statusCode : 500
+const { constants } = require('../constants');
+const errorHandler = (err, req, res, next) => {
+    const statusCode = res.statusCode ? req.statusCode : 500;
+    res.status(statusCode)
     switch (statusCode) {
-        case constants.FORBIDDED:
+        case constants.NOT_FOUND:
             res.json({
-                title: "Forbidded",
-                message: err.message,
-                stackTrace : err.stack
-            })
+                error: err.message,
+                status: "Not Found",
+            });
             break;
-        
-        case constants.VALIDATION_ERROR:
+        case constants.FORBIDDEN:
             res.json({
-                title: "Not Found",
-                message: err.message,
-                stackTrace : err.stack
-            })
+                error: err.message,
+                status: "Bad Request",
+            });
             break;
-        
-        case constants.VALIDATION_ERROR:
+        case constants.UNAUTHORIZED:
             res.json({
-                    title: "Validation Error",
-                    message: err.message,
-                    stackTrace : err.stack
-                })
+                error: err.message,
+                status: "Unauthorized",
+            });
             break;
-        
-        case constants.UNAUTHORIZD:
+        case constants.FORBIDDEN:
             res.json({
-                    title: "Unauthorized",
-                    message: err.message,
-                    stackTrace : err.stack
-                })
+                error: err.message,
+                status: "Forbidden",
+            });
             break;
-        
-        case constants.SERVER_ERROR:
-            res.json({
-                title:"Server Error",
-                message: err.message,
-                stackTrace : err.stack
-            })
-
+        case constants.INTERNAL_SERVER_ERROR:
         default:
-            console.log("No Error All Working Fine")
+            res.json({
+                error: err.message,
+                status: "Internal Server Error",
+            });
             break;
     }
 }
+module.exports=errorHandler

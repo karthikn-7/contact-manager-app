@@ -16,9 +16,6 @@ const contactShcema = mongoose.Schema({
         type:String,
         required:[true, 'please add a contact number']
     }
-},
-{
-    timestamps:true,
 }
 )
  

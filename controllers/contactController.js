@@ -5,15 +5,22 @@ const Contact = require('../models/contactModel');
 
 // get all contacts
 // GET api/getcontacts
-const getContacts =asyncHandler(async (req, res) =>{
+const getContacts =asyncHandler(async (req, res, next) =>{
+
     const contacts =await Contact.find({})
+    if (!contacts){
+        res.status(404)
+        throw new Error("contact not found")
+    }
     res.status(200).json(contacts);
+    
 });
 
 const createContact =asyncHandler(async (req, res) => {
     const data = req.body
     const { name, phone, email} = data;
     if (!name || !phone || !email ){
+        res.status(400)
         throw new Error("All field are mandatory!!")
     }
     const contact = Contact.create({
@@ -22,7 +29,7 @@ const createContact =asyncHandler(async (req, res) => {
         email
     })
     res.status(201).json({
-        contact,
+        message: "contact created successfully!" 
     })
 
     
@@ -32,22 +39,17 @@ const createContact =asyncHandler(async (req, res) => {
 // GET api/getcontacts/:id
 
 const getContact =asyncHandler(async (req, res) =>{
-    try{
-        const id = req.params.id
-        const contact = await Contact.findById(id)
-        try{
-            res.send(contact)
-        }catch(error){
-            req.json({
-                message:`error finding the contact for id: ${id}`,
-                error:`${error.message}`
-            })
-        }
-    }catch(error){
-        res.json({
-            error:`${error.message}`
-        })
+
+    const id = req.params.id
+    const contact = await Contact.findById(id)
+    if (!contact){
+        res.status(400)
+        const error = new Error("contact not found!")
+
     }
+    res.status(200).json(contact)
+    
+    
     
 });
 
@@ -55,7 +57,27 @@ const getContact =asyncHandler(async (req, res) =>{
 // PUT api/getcontacts/:id
 
 const updateContact =asyncHandler(async (req, res) => {
-    res.status(200).json({message:`update contact. id:${req.params.id}`});
+    const id = req.params.id
+    if(!id){
+        res.status(405).json({
+            error:"method not allowed"
+        })
+    }
+    try{
+        
+        const data = req.body
+        const contact = await Contact.findById(id)
+        const updatedContact = await Contact.findByIdAndUpdate(id,data,{ new : true })
+        res.status(200).json(updatedContact)
+
+
+    }catch(error){
+        res.status(404).json({
+            error:"contact not found"
+        })
+    }
+
+    
 })
 
 // delete contact
@@ -64,6 +86,8 @@ const updateContact =asyncHandler(async (req, res) => {
 const deleteContact =asyncHandler(async (req, res) => {
     res.status(200).json({message:`delete contact. id:${req.params.id}`});
 }); 
+
+
 
 module.exports = {
     getContacts,
